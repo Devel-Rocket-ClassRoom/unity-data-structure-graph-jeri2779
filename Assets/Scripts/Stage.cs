@@ -4,9 +4,11 @@ public class Stage : MonoBehaviour
 {
     public GameObject tilePrefab;
     private GameObject[] tileObjs;
+    private SpriteRenderer[] tileRenderers;
 
     public int mapWidth = 20;
     public int mapHeight = 20;
+    public int viewRange = 3;
 
     [Range(0f, 0.9f)]
     public float erodePercent = 0.5f;
@@ -113,7 +115,6 @@ public class Stage : MonoBehaviour
                 Destroy(tile.gameObject);
             }
         }
-
         tileObjs = new GameObject[mapWidth * mapHeight];
 
         var StartX = -(mapWidth * tileSize.x) / 2f;
@@ -127,6 +128,7 @@ public class Stage : MonoBehaviour
                 var tileId = i * mapWidth + j;
                 var newGo = Instantiate(tilePrefab, transform);
                 newGo.transform.position = position;
+               
                 tileObjs[tileId] = newGo;
                 DecorateTile(tileId);
                 position.x += tileSize.x;
@@ -140,23 +142,74 @@ public class Stage : MonoBehaviour
         var tile = map.tiles[tileId];
         var tileGo = tileObjs[tileId];
         var ren = tileGo.GetComponent<SpriteRenderer>();
-        //var fowRen = 
-
-        if (tile.autoTileId != (int)TileTypes.Empty)
+        if (tile.isVisited)
         {
-            ren.sprite = islandSprites[tile.autoTileId];
-
+            
+            if (tile.autoTileId != (int)TileTypes.Empty)
+                ren.sprite = islandSprites[tile.autoTileId];
+            else
+                ren.sprite = null;
         }
         else
         {
-            ren.sprite = null;
+            if (tile.fowAutoTileId > 0 && tile.fowAutoTileId < fowSprites.Length)
+                ren.sprite = fowSprites[tile.fowAutoTileId];
+            else
+                ren.sprite = fowSprites[15];
         }
+    }
+    public void UpdateFow(int tileId)
+    {
+        int r = tileId / mapWidth;
+        int c = tileId % mapWidth;
+
+        for (int i = -viewRange; i <= viewRange; i++)
+        {
+            for (int j = -viewRange; j <= viewRange; j++)
+            {
+                int nr = r + i;
+                int nc = c + j;
+                if (nr < 0 || nr >= mapHeight || nc < 0 || nc >= mapWidth)
+                    continue;
+                int targetId = nr * mapWidth + nc;
+                map.tiles[targetId].VisitedTiles();
+                DecorateTile(targetId);
+            }
+        }
+
+        
+        for (int i = -(viewRange + 1); i <= (viewRange + 1); i++)
+        {
+            for (int j = -(viewRange + 1); j <= (viewRange + 1); j++)
+            {
+                if (Mathf.Abs(i) <= viewRange && Mathf.Abs(j) <= viewRange)
+                    continue; // 1번 루프에서 이미 처리됨
+                int nr = r + i;
+                int nc = c + j;
+                if (nr < 0 || nr >= mapHeight || nc < 0 || nc >= mapWidth)
+                    continue;
+                int targetId = nr * mapWidth + nc;
+                map.tiles[targetId].UpdateFowTileId();
+                DecorateTile(targetId);
+            }
+        }
+
+        //for (int i = 0; i < tileObjs.Length; i++)
+        //{
+        //    DecorateTile(i);
+        //}
     }
 
     private void CreatePlayer()
     {
+        if (player != null)
+        {
+            Destroy(player.gameObject);
+        }
         player = Instantiate(playerPrefab);
-        player.MoveTo(map.startTileId);
+        player.transform.position = GetTilePos(map.startTileId.id);
+        
+        player.MoveTo(map.startTileId);  
     }
 
     // 1. stage 게임 오브젝트의 포지션이 그리드의 중점이 되도록 수정

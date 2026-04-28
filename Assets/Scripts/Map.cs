@@ -35,41 +35,39 @@ public class Map
         this.cols = cols;
 
         tiles = new Tile[rows * cols];
-        for (int i = 0; i < tiles.Length; ++i)
+        for (int i = 0; i < tiles.Length; i++)
         {
             tiles[i] = new Tile();
             tiles[i].id = i;
-        }
 
-        for (int r = 0; r < rows; ++r)
+        }
+        for (int r = 0; r < rows; r++)
         {
-            for (int c = 0; c < cols; ++c)
+            for (int c = 0; c < cols; c++)
             {
                 int index = r * cols + c;
                 var adjacents = tiles[index].adjacents;
+
                 if ((r - 1) >= 0)
                 {
                     adjacents[(int)Sides.Top] = tiles[index - cols];
                 }
-
                 if ((c + 1) < cols)
                 {
                     adjacents[(int)Sides.Right] = tiles[index + 1];
                 }
-
                 if ((c - 1) >= 0)
                 {
                     adjacents[(int)Sides.Left] = tiles[index - 1];
-                }
 
+                }
                 if ((r + 1) < rows)
                 {
                     adjacents[(int)Sides.Bottom] = tiles[index + cols];
                 }
             }
         }
-
-        for (int i = 0; i < tiles.Length; ++i)
+        for (int i = 0; i < tiles.Length; i++)
         {
             tiles[i].UpdateAutoTileId();
         }
@@ -114,7 +112,7 @@ public class Map
             DecorateTile(CoastTiles, erodePercent, TileTypes.Empty);
 
         }
-        var castleTile = tiles.FirstOrDefault(t => t.autoTileId == (int)TileTypes.Castle);
+        //var castleTile = tiles.FirstOrDefault(t => t.autoTileId == (int)TileTypes.Castle);
 
         DecorateTile(LandTiles, townPercent, TileTypes.Towns);          //마을 생성
         DecorateTile(LandTiles, lakePercent, TileTypes.Empty);          //호수 생성
@@ -126,7 +124,7 @@ public class Map
         var towns = tiles.Where(t => t.autoTileId == (int)TileTypes.Towns).ToArray();
         ShuffleTiles(towns);
         startTileId = towns[0];
-        castleTile = towns[1];
+        var castleTile = towns[1];
         castleTile.autoTileId = (int)TileTypes.Castle;
         return true;
     }
