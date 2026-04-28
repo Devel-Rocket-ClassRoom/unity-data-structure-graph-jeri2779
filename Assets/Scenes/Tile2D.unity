@@ -293,9 +293,10 @@ MonoBehaviour:
   tilePrefab: {fileID: 3660256616398614680, guid: 5e1dc6452458df844a0c5cea34880b06, type: 3}
   mapWidth: 20
   mapHeight: 20
+  viewRange: 3
   erodePercent: 0.626
   erodeIterations: 2
-  lakePercent: 0.03
+  lakePercent: 0.1
   treePercent: 0.3
   hillPercent: 0.05
   mountainPercent: 0.07
