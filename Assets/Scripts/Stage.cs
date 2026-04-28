@@ -140,6 +140,7 @@ public class Stage : MonoBehaviour
         var tile = map.tiles[tileId];
         var tileGo = tileObjs[tileId];
         var ren = tileGo.GetComponent<SpriteRenderer>();
+        //var fowRen = 
 
         if (tile.autoTileId != (int)TileTypes.Empty)
         {

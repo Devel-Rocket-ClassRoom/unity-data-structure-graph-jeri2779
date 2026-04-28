@@ -24,6 +24,7 @@ public class Tile
     public int id;
     public Tile[] adjacents = new Tile[4];
     public int autoTileId;
+    public int fowAutoTileId;
     public bool isVisited = false;
     public bool CanMove => autoTileId != (int)TileTypes.Empty;
 
@@ -42,34 +43,13 @@ public class Tile
             }
         }
     }
-    public void UpdateFowAutoTileId()//시야 타일 ID 업데이트 (인접 타일이 방문된 경우에만 고려)
-    {
-        autoTileId = 0;
-        for (int i = 0; i < adjacents.Length; i++)
-        {
-            if (adjacents[i] != null && adjacents[i].isVisited)
-            {
-                autoTileId |= (1 << i);
-            }
-        }
-    }
+ 
     //fow타일 업데이트는 인접 타일이 방문된 경우에만 고려
     //인접 타일이 null이 아니고 방문된 경우에만 autoTileId 업데이트
     //인접 타일이 null이거나 방문되지 않은 경우에는 autoTileId 업데이트하지 않음
     //이렇게 하면 시야 타일이 주변 타일의 상태에 따라 올바르게 업데이트되고, 방문되지 않은 타일은 시야 타일로 간주되지 않도록 할 수 있음
     //인접 타일이 null이거나 방문되지 않은 경우에는 시야 타일로 간주되지 않도록 함
-    public void VisitedTile(Tile tile)
-    {
-        for (int i = 0; i < adjacents.Length; i++)
-        {
-            if (adjacents[i] != null && adjacents[i].id == tile.id)
-            {
-                adjacents[i].isVisited = true;
-                adjacents[i].UpdateFowAutoTileId();
-                break;
-            }
-        }
-    }
+   
 
 
     public void RemoveAdjacent(Tile tile)//특정 방향의 인접 타일 제거
