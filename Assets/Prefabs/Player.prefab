@@ -127,3 +127,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c6db9d45746966499fc964f8ca570af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovemnet
+  currentTileId: 0
+  moveSpeed: 4

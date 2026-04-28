@@ -73,6 +73,21 @@ public class Map
         }
     }
 
+    public int[,] ToGrid()
+    {
+        var grid = new int[rows, cols];
+        
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                var tileIndex = r * cols + c;
+                grid[r, c] = tiles[tileIndex].CanMove ? 1 : -1;
+            }
+        }
+        return grid;
+    }
+
     public void ShuffleTiles(Tile[] tiles)
     {
         for (int i = tiles.Length - 1; i >= 0; --i)

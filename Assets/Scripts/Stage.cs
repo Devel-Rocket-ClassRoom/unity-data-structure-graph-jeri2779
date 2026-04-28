@@ -30,6 +30,9 @@ public class Stage : MonoBehaviour
     public PlayerMovement playerPrefab;
     private PlayerMovement player;
 
+    private Graph graph;
+    public Graph Graph => graph;
+
     private Vector3 FirstTilePos
     {
         get
@@ -101,8 +104,11 @@ public class Stage : MonoBehaviour
                          monsterPercent
 
                         );
+        graph = new Graph();
+        graph.Init(map.ToGrid());
         CreateGrid();
         CreatePlayer();
+
     }
 
 
@@ -152,28 +158,28 @@ public class Stage : MonoBehaviour
         }
         else
         {
-            if (tile.fowAutoTileId > 0 && tile.fowAutoTileId < fowSprites.Length)
-                ren.sprite = fowSprites[tile.fowAutoTileId];
+            if (tile.fowTileId > 0 && tile.fowTileId < fowSprites.Length)
+                ren.sprite = fowSprites[tile.fowTileId];
             else
                 ren.sprite = fowSprites[15];
         }
     }
-    public void UpdateFow(int tileId)
+    public void DrawFow(int tileId)
     {
-        int r = tileId / mapWidth;
-        int c = tileId % mapWidth;
+        int row = tileId / mapWidth;
+        int col = tileId % mapWidth;
 
         for (int i = -viewRange; i <= viewRange; i++)
         {
             for (int j = -viewRange; j <= viewRange; j++)
             {
-                int nr = r + i;
-                int nc = c + j;
-                if (nr < 0 || nr >= mapHeight || nc < 0 || nc >= mapWidth)
+                int tgtRow = row + i;
+                int tgtCol = col + j;
+                if (tgtRow < 0 || tgtRow >= mapHeight || tgtCol < 0 || tgtCol >= mapWidth)
                     continue;
-                int targetId = nr * mapWidth + nc;
-                map.tiles[targetId].VisitedTiles();
-                DecorateTile(targetId);
+                int targetId = tgtRow * mapWidth + tgtCol;
+                map.tiles[targetId].VisitedCheck();
+                //DecorateTile(targetId);
             }
         }
 
@@ -182,15 +188,13 @@ public class Stage : MonoBehaviour
         {
             for (int j = -(viewRange + 1); j <= (viewRange + 1); j++)
             {
-                if (Mathf.Abs(i) <= viewRange && Mathf.Abs(j) <= viewRange)
-                    continue; // 1번 루프에서 이미 처리됨
-                int nr = r + i;
-                int nc = c + j;
-                if (nr < 0 || nr >= mapHeight || nc < 0 || nc >= mapWidth)
+                int tgtRow = row + i;
+                int tgtCol = col + j;
+                if (tgtRow < 0 || tgtRow >= mapHeight || tgtCol < 0 || tgtCol >= mapWidth)
                     continue;
-                int targetId = nr * mapWidth + nc;
-                map.tiles[targetId].UpdateFowTileId();
-                DecorateTile(targetId);
+                int targetId = tgtRow * mapWidth + tgtCol;
+                map.tiles[targetId].UpdateFowTileId(map);
+                DecorateTile(targetId);//
             }
         }
 
