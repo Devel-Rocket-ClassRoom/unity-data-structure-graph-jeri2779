@@ -325,7 +325,23 @@ MonoBehaviour:
   - {fileID: 21300038, guid: 6dda2095192964815b349ac505a5e664, type: 3}
   - {fileID: 21300040, guid: 6dda2095192964815b349ac505a5e664, type: 3}
   - {fileID: 21300042, guid: 6dda2095192964815b349ac505a5e664, type: 3}
-  fowSprites: []
+  fowSprites:
+  - {fileID: 21300000, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300002, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300004, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300006, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300008, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300010, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300012, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300014, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300016, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300018, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300020, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300022, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300024, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300026, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300028, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  - {fileID: 21300030, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
   playerPrefab: {fileID: 4240441767808712786, guid: 49397fe3ea0b5554abb9de1977ed6272, type: 3}
 --- !u!1 &1724551544
 GameObject:
