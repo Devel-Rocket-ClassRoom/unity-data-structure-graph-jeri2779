@@ -331,7 +331,7 @@ public class Stage : MonoBehaviour
 
         for (int i = 0; i < path.Count; i++)
         {
-            var color = Color.Lerp(Color.red, Color.green, (float)i / (path.Count));
+            var color = Color.Lerp(Color.green, Color.red, (float)i / (path.Count));
             tileObjs[path[i].id].GetComponent<SpriteRenderer>().color = color;
         }
     }
