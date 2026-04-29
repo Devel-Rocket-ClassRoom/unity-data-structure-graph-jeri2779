@@ -1,6 +1,9 @@
  
 using NUnit.Framework;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum TileTypes
@@ -16,6 +19,7 @@ public enum TileTypes
     Castle,
     Monster,
 }
+
 public class Map
 {
     public int rows = 0;
@@ -27,7 +31,8 @@ public class Map
     public Tile[] LandTiles => tiles.Where(t => t.autoTileId == (int)TileTypes.Grass).ToArray();
 
     public Tile startTileId;
-    public Tile endTileId;
+    public Tile castleTileId;
+    private bool success;
 
     public void Init(int rows, int cols)
     {
@@ -70,6 +75,7 @@ public class Map
         for (int i = 0; i < tiles.Length; i++)
         {
             tiles[i].UpdateAutoTileId();
+            tiles[i].UpdateFowTileId(this);
         }
     }
 
@@ -82,7 +88,19 @@ public class Map
             for (int c = 0; c < cols; c++)
             {
                 var tileIndex = r * cols + c;
-                grid[r, c] = tiles[tileIndex].CanMove ? 1 : -1;
+                var tile = tiles[tileIndex];
+                grid[r, c] = tile.autoTileId 
+                switch
+                {
+                    // TileTypes. Grass(15)=1, Tree(16)=2, Hills(17)=4, Mountains(18)=MAX(통과 불가), Towns(19)=1, Castle(20)=1, Monster(21)=1.
+                    (int)TileTypes.Empty => -1, // 빈 타일은 통과 불가로 설정
+                    (int)TileTypes.Mountains => -1, // 산은 통과 불가로 설정
+                    (int)TileTypes.Tree => 2,
+                    (int)TileTypes.Hills => 4,
+                    _ => tile.CanMove ? 1 : -1
+
+                };
+
             }
         }
         return grid;
@@ -138,9 +156,22 @@ public class Map
 
         var towns = tiles.Where(t => t.autoTileId == (int)TileTypes.Towns).ToArray();
         ShuffleTiles(towns);
-        startTileId = towns[0];
-        var castleTile = towns[1];
+        startTileId = towns[0];   //생성된 마을중 하나를 시작점으로 설정
+        var castleTile = towns[1];//생성된 마을중 하나를 성으로 설정
         castleTile.autoTileId = (int)TileTypes.Castle;
+
+
+        var graph = new Graph();
+        graph.Init(ToGrid());
+        var search = new GraphSearch();
+        search.Init(graph);
+
+        if (!search.AStar(graph.nodes[startTileId.id], graph.nodes[castleTile.id]))
+        {
+            return false;
+        }
+
+
         return true;
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Stage : MonoBehaviour
@@ -33,6 +34,8 @@ public class Stage : MonoBehaviour
     private Graph graph;
     public Graph Graph => graph;
 
+    private List<GraphNode> currentPath = null;
+
     private Vector3 FirstTilePos
     {
         get
@@ -56,15 +59,29 @@ public class Stage : MonoBehaviour
     }
     private void Update()
     {
+        if(Input.GetMouseButtonDown(0))
+        {
+             
+            var tileId = ScreenPosToTileId(Input.mousePosition);
+            if (map.tiles[tileId].isVisited)
+            {
+                player.SearchMove(tileId);
+            }
+            else
+            {
+                Debug.Log("미발견 구역.");
+                return;
+            }
+        }
         if (Input.GetKeyDown(KeyCode.Space))
         {
             ResetStage();
         }
-        if (Input.GetMouseButtonDown(0))
-        {
-            var tileId = ScreenPosToTileId(Input.mousePosition);
-            Debug.Log($"Tile ID: {tileId}");
-        }
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    var tileId = ScreenPosToTileId(Input.mousePosition);
+        //    Debug.Log($"Tile ID: {tileId}");
+        //}
 
 
         if (Input.GetMouseButtonDown(1))
@@ -72,28 +89,32 @@ public class Stage : MonoBehaviour
             var tilePos = GetTilePos(ScreenPosToTileId(Input.mousePosition));
             Debug.Log($"Tile Position: {tilePos}");
         }
-        if (tileObjs != null)
-        {
-            int currentTileId = ScreenPosToTileId(Input.mousePosition);
+        //if (tileObjs != null)
+        //{
+        //    int currentTileId = ScreenPosToTileId(Input.mousePosition);
 
-            if (prevTileId != currentTileId)
-            {
-                tileObjs[currentTileId].GetComponent<SpriteRenderer>().color = Color.green;
-                if (prevTileId >= 0 && prevTileId < tileObjs.Length)
-                {
-                    tileObjs[prevTileId].GetComponent<SpriteRenderer>().color = Color.white;
-                }
-                prevTileId = currentTileId;
-            }
+        //    if (prevTileId != currentTileId)
+        //    {
+        //        tileObjs[currentTileId].GetComponent<SpriteRenderer>().color = Color.pink;
+        //        if (prevTileId >= 0 && prevTileId < tileObjs.Length)
+        //        {
+        //            tileObjs[prevTileId].GetComponent<SpriteRenderer>().color = Color.white;
+        //        }
+        //        prevTileId = currentTileId;
+        //    }
 
-        }
+        //}
     }
 
     private void ResetStage()
     {
-        map = new Map();
-        map.Init(mapHeight, mapWidth);
-        map.CreateIsland(
+        do
+        {
+            map = new Map();
+            map.Init(mapHeight, mapWidth);
+
+        }
+        while (!map.CreateIsland(
                          erodePercent,
                          erodeIterations,
                          lakePercent,
@@ -102,13 +123,28 @@ public class Stage : MonoBehaviour
                          mountainPercent,
                          townPercent,
                          monsterPercent
-
-                        );
+                        ));
+       
         graph = new Graph();
         graph.Init(map.ToGrid());
         CreateGrid();
+        //DrawPath(map.AStar(map.startTileId, map.endTileId));
         CreatePlayer();
+    }
 
+    private void DrawPath(List<Tile> path)
+    {
+        foreach(var tile in tileObjs)
+        {
+            tile.GetComponent<SpriteRenderer>().color = Color.white;
+        }
+        for(int i = 0; i < path.Count; i++)
+        {
+            float t = i / (float)(path.Count-1);
+            tileObjs[path[i].id].GetComponent<SpriteRenderer>().color = 
+                Color.Lerp(Color.white, Color.green, t);
+
+        }
     }
 
 
@@ -152,18 +188,77 @@ public class Stage : MonoBehaviour
         {
             
             if (tile.autoTileId != (int)TileTypes.Empty)
+            {
                 ren.sprite = islandSprites[tile.autoTileId];
+            }
             else
+            {
                 ren.sprite = null;
+            }
         }
         else
         {
             if (tile.fowTileId > 0 && tile.fowTileId < fowSprites.Length)
+            {
                 ren.sprite = fowSprites[tile.fowTileId];
+            }
             else
+            {
                 ren.sprite = fowSprites[15];
+            }
         }
     }
+    public int visitRadius = 1;
+    public void OnTileVisited(int tileId)
+    {
+        if (tileId < 0 || tileId >= map.tiles.Length) return;
+        OnTileVisited(map.tiles[tileId]);
+    }
+    public void OnTileVisited(Tile tile)
+    {
+        if (tile == null) return;
+        int centerX = tile.id % mapWidth;
+        int centerY = tile.id / mapWidth;
+
+        for(int i = -visitRadius; i <= visitRadius; i++)
+        {
+            for (int j = -visitRadius; j <= visitRadius; j++)
+            {
+                int tgtX = centerX + j;
+                int tgtY = centerY + i;
+                if (tgtX < 0 || tgtX >= mapWidth || tgtY < 0 || tgtY >= mapHeight)
+                {
+                    continue;
+                }
+                int targetId = tgtY * mapWidth + tgtX;
+                map.tiles[targetId].isVisited = true;
+                DecorateTile(targetId);
+            }
+        }
+        var radius = visitRadius + 1;
+        for (int i = -radius; i <= radius; i++)
+        {
+            for (int j = -radius; j <= radius; j++)
+            {
+                if(i == radius || i == -radius || j == radius || j == -radius)
+                {
+                    // 테두리만 업데이트
+                    int tgtX = centerX + j;
+                    int tgtY = centerY + i;
+                    if (tgtX < 0 || tgtX >= mapWidth || tgtY < 0 || tgtY >= mapHeight)
+                    {
+                        continue;
+                    }
+                    int targetId = tgtY * mapWidth + tgtX;
+                    map.tiles[targetId].UpdateFowTileId(map);
+                    DecorateTile(targetId);
+                }
+            }
+        }
+
+
+    }
+
     public void DrawFow(int tileId)
     {
         int row = tileId / mapWidth;
@@ -211,13 +306,62 @@ public class Stage : MonoBehaviour
             Destroy(player.gameObject);
         }
         player = Instantiate(playerPrefab);
-        player.transform.position = GetTilePos(map.startTileId.id);
-        
-        player.MoveTo(map.startTileId);  
+        player.Warp(map.startTileId.id);
+        //player.transform.position = GetTilePos(map.startTileId.id);
+
+        //player.MoveTo(map.startTileId);  
     }
 
     // 1. stage 게임 오브젝트의 포지션이 그리드의 중점이 되도록 수정
     // 2. 아래 4개 메소드 구현
+
+
+    public void ShowPath(List<GraphNode> path)
+    {
+        if (path == null || path.Count <= 1) return;
+
+        
+        if(currentPath != null && currentPath.Count > 0)
+        {
+            ClearPath(currentPath);
+        }
+
+        
+        currentPath = path;
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            var color = Color.Lerp(Color.red, Color.green, (float)i / (path.Count));
+            tileObjs[path[i].id].GetComponent<SpriteRenderer>().color = color;
+        }
+    }
+
+
+    public void ClearPath(List<GraphNode> path)
+    {
+        if(path == null) return;
+
+        foreach (var node in path)
+        {
+            if(node.id >= 0 && node.id < tileObjs.Length && tileObjs[node.id] != null)
+            {
+                var ren = tileObjs[node.id].GetComponent<SpriteRenderer>();
+                if(ren != null)
+                {
+                    ren.color = Color.white;
+                }
+            }
+        }
+    }
+
+    public void ClearCurrentPath()
+    {
+        if(currentPath != null && currentPath.Count > 0)
+        {
+            ClearPath(currentPath);
+            currentPath = null;
+        }
+    }
 
     public int ScreenPosToTileId(Vector3 screenPos)
     {

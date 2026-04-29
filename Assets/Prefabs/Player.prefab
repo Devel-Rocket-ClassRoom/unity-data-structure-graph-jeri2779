@@ -128,4 +128,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovemnet
   currentTileId: 0
-  moveSpeed: 4
+  targetTileId: 0
+  moveSpeed: 64
